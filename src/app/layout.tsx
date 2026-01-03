@@ -4,8 +4,8 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LabConnect UCSC",
-  description: "Find research opportunities across UCSC",
+  title: "SlugLabs",
+  description: "Streamlined access to UCSC research opportunities",
 };
 
 export default function RootLayout({
@@ -15,55 +15,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="app-shell">
         {/* Shared Header */}
-        <header
-          style={{
-            backgroundColor: "white",
-            padding: "1rem",
-            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              padding: "0 1rem",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <h1>
-                <span style={{ fontWeight: "bold", color: "#1a365d" }}>
-                  Lab
-                </span>
-                <span style={{ fontWeight: "bold", color: "#1a365d" }}>
-                  Connect
-                </span>{" "}
-                <span style={{ color: "#4a5568" }}>UCSC</span>
+        <header className="site-header">
+          <div className="site-header-inner">
+            <div className="brand">
+              <h1 className="brand-title">
+                <span className="brand-mark">Slug</span>
+                <span className="brand-mark brand-mark-alt">Labs</span>
               </h1>
+              <span className="brand-subtitle">UCSC Research Network</span>
             </div>
-            <nav style={{ display: "flex", gap: "1rem" }}>
-              <Link
-                href="/"
-                style={{
-                  color: "#4a5568",
-                  textDecoration: "none",
-                  fontWeight: "500",
-                }}
-              >
+            <nav className="site-nav">
+              <Link href="/" className="nav-link">
                 Home
               </Link>
-              <Link
-                href="/directory"
-                style={{
-                  color: "#4a5568",
-                  textDecoration: "none",
-                  fontWeight: "500",
-                }}
-              >
+              <Link href="/directory" className="nav-link">
                 Directory
               </Link>
             </nav>
@@ -74,43 +41,21 @@ export default function RootLayout({
         <main>{children}</main>
 
         {/* Shared Footer */}
-        <footer
-          style={{
-            backgroundColor: "#f7fafc",
-            padding: "1rem",
-            textAlign: "center",
-          }}
-        >
-          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "1rem",
-                marginBottom: "0.5rem",
-              }}
-            >
-              <a
-                href="/about"
-                style={{ color: "#4a5568", textDecoration: "none" }}
-              >
-                About Us
+        <footer className="site-footer">
+          <div className="site-footer-inner">
+            <div className="footer-links">
+              <a href="/about" className="footer-link">
+                About
               </a>
-              <a
-                href="/contact"
-                style={{ color: "#4a5568", textDecoration: "none" }}
-              >
+              <a href="/contact" className="footer-link">
                 Contact
               </a>
-              <a
-                href="/privacy"
-                style={{ color: "#4a5568", textDecoration: "none" }}
-              >
-                Privacy Policy
+              <a href="/privacy" className="footer-link">
+                Privacy
               </a>
             </div>
-            <p style={{ color: "#718096", fontSize: "0.875rem" }}>
-              Contact us at: info@labconnect.ucsc.edu
+            <p className="footer-contact">
+              Contact us at: hello@sluglabs.ucsc.edu
             </p>
           </div>
         </footer>

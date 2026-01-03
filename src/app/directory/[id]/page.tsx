@@ -86,7 +86,7 @@ export default function LabProfile() {
                 Contact Lab!
               </a>
               <a href="./" className="back-button">
-                Back to Lab Directory
+                Back to SlugLabs Directory
               </a>
             </div>
           </div>
@@ -97,20 +97,22 @@ export default function LabProfile() {
           display: flex;
           flex-direction: column;
           min-height: 100vh;
-          font-family: Arial, sans-serif;
+          padding: 2rem 1.25rem 3rem;
         }
         .container {
           max-width: 1000px;
           margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          background-color: rgba(15, 23, 42, 0.85);
+          box-shadow: 0 25px 60px rgba(2, 6, 23, 0.45);
           flex: 1;
           width: 100%;
+          border-radius: 24px;
+          border: 1px solid rgba(148, 163, 184, 0.18);
         }
         .header {
-          background-color: #f5f5f5;
+          background-color: rgba(8, 12, 24, 0.9);
           padding: 15px 20px;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.18);
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -120,7 +122,7 @@ export default function LabProfile() {
           align-items: center;
         }
         .logo-text-lab {
-          color: #14457f;
+          color: #e2e8f0;
           font-size: 28px;
           font-weight: bold;
         }
@@ -130,16 +132,18 @@ export default function LabProfile() {
           font-weight: bold;
         }
         .nav-button {
-          background-color: #ccc;
+          background-color: rgba(47, 107, 255, 0.2);
           padding: 5px 15px;
           border-radius: 5px;
-          color: #333;
+          color: #e2e8f0;
           text-decoration: none;
           font-size: 16px;
         }
         .main-content {
-          display: flex;
-          padding: 30px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+          padding: 2.5rem;
+          gap: 2rem;
           min-height: 400px;
         }
         .left-column {
@@ -154,27 +158,34 @@ export default function LabProfile() {
           justify-content: center;
         }
         h2 {
-          font-size: 32px;
+          font-family: var(--font-display);
+          font-size: 2.5rem;
           margin-top: 0;
           margin-bottom: 20px;
-          color: #14457f;
+          color: #e2e8f0;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
         }
         .lab-description {
           margin-bottom: 30px;
           font-size: 18px;
           line-height: 1.6;
+          color: #cbd5f5;
         }
         .section-title {
           font-size: 24px;
           font-weight: bold;
           margin-top: 20px;
           margin-bottom: 15px;
-          color: #333;
+          color: #f5c526;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
         }
         .contact-details {
           margin-bottom: 30px;
           font-size: 18px;
           line-height: 1.6;
+          color: #cbd5f5;
         }
         .right-buttons {
           width: 100%;
@@ -186,65 +197,77 @@ export default function LabProfile() {
         .apply-button {
           display: block;
           width: 90%;
-          background-color: #fcd34d;
+          background: linear-gradient(120deg, #f5c526, #f8e08a);
           border: none;
-          color: black;
+          color: #0b1120;
           padding: 12px 20px;
-          border-radius: 5px;
+          border-radius: 12px;
           text-align: center;
           cursor: pointer;
           text-decoration: none;
           font-size: 18px;
           font-weight: bold;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 18px 30px rgba(245, 197, 66, 0.3);
           transition: transform 0.2s, box-shadow 0.2s;
         }
         .apply-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 22px 34px rgba(245, 197, 66, 0.35);
         }
         .contact-lab-button {
           display: block;
           width: 90%;
-          background-color: #14457f;
+          background: linear-gradient(120deg, #2f6bff, #0ea5e9);
           border: none;
           color: white;
           padding: 12px 20px;
-          border-radius: 5px;
+          border-radius: 12px;
           text-align: center;
           cursor: pointer;
           text-decoration: none;
           font-size: 18px;
           font-weight: bold;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 18px 30px rgba(47, 107, 255, 0.35);
           transition: transform 0.2s, box-shadow 0.2s;
         }
         .contact-lab-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 24px 36px rgba(47, 107, 255, 0.45);
         }
         .back-button {
           display: block;
           width: 90%;
-          background-color: #ddd;
-          color: #333;
+          background-color: rgba(148, 163, 184, 0.1);
+          color: #e2e8f0;
           padding: 12px 20px;
-          border-radius: 5px;
+          border-radius: 12px;
           text-align: center;
           cursor: pointer;
           text-decoration: none;
           font-size: 18px;
           font-weight: bold;
-          transition: background-color 0.2s;
+          transition: background-color 0.2s, color 0.2s;
+          border: 1px solid rgba(148, 163, 184, 0.2);
         }
         .back-button:hover {
-          background-color: #ccc;
+          background-color: rgba(148, 163, 184, 0.2);
+          color: #f8fafc;
         }
         .loading {
           text-align: center;
           padding: 50px;
           font-size: 20px;
-          color: #666;
+          color: #94a3b8;
+        }
+        @media (max-width: 900px) {
+          .main-content {
+            grid-template-columns: 1fr;
+            padding: 2rem;
+          }
+
+          .left-column {
+            padding-right: 0;
+          }
         }
       `}</style>
     </div>

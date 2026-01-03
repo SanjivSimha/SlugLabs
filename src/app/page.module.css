@@ -1,129 +1,200 @@
 /* app/page.module.css */
 
 .container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-}
-
-.navLink {
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: white;
-  text-decoration: none;
 }
 
 .main {
-  flex-grow: 1;
-  padding: 1.5rem;
-  margin: 1rem;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .logoSection {
-  text-align: center;
-  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .logoText {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  letter-spacing: 0.1em;
+  display: flex;
+  gap: 0.35rem;
+  text-transform: uppercase;
+}
+
+.brandSlug {
+  color: var(--text);
+}
+
+.brandLabs {
+  color: var(--gold);
+}
+
+.heroLead {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 28rem;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.badge {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(47, 107, 255, 0.16);
+  color: var(--text);
+  border: 1px solid rgba(47, 107, 255, 0.35);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.heroPanel {
+  background: linear-gradient(135deg, rgba(47, 107, 255, 0.2), transparent 50%),
+    rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.panelHeader {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
 }
 
-.labConnect {
-  color: #1a365d;
-}
-
-.ucsc {
-  color: #ecc94b;
-}
-
-.taglineContainer {
+.panelBody {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.25rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
 }
 
-.divider {
-  display: none;
-  height: 1.5rem;
-  border-left: 2px solid #000000;
+.panelCard {
+  background: rgba(17, 24, 39, 0.8);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.tagline {
-  font-weight: 500;
-  margin-bottom: 1rem;
+.panelTitle {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.panelMeta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .uploadSection {
-  max-width: 42rem;
-  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 24px;
+  padding: 2.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: var(--shadow);
 }
 
 .uploadButton {
-  background-color: #fef9c3;
-  color: #1a202c;
-  font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  display: flex;
+  background: linear-gradient(120deg, var(--gold), #f8e08a);
+  color: #0b1120;
+  font-weight: 700;
+  padding: 0.9rem 1.75rem;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 2rem auto;
+  gap: 0.5rem;
   cursor: pointer;
   border: none;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 24px rgba(245, 197, 66, 0.35);
 }
 
 .uploadButton:hover {
-  background-color: #fde68a;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(245, 197, 66, 0.4);
 }
 
 .uploadIcon {
   width: 1.25rem;
   height: 1.25rem;
-  margin-right: 0.5rem;
 }
 
 .fileDisplay {
-  margin-bottom: 2.5rem;
+  margin: 2rem 0;
 }
 
 .fileContainer {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.6);
 }
 
 .fileHeader {
-  background-color: #edf2f7;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
 }
 
 .fileContent {
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .fileName {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deleteButton {
-  color: #718096;
+  color: var(--text-muted);
   background: none;
   border: none;
   cursor: pointer;
 }
 
 .deleteButton:hover {
-  color: #c12222;
+  color: #f87171;
 }
 
 .deleteIcon {
@@ -132,80 +203,108 @@
 }
 
 .connectButton {
-  background-color: #fcd34d;
-  color: #1a202c;
+  background: linear-gradient(120deg, var(--blue), #0ea5e9);
+  color: white;
   font-weight: 700;
-  padding: 0.75rem 2rem;
-  border-radius: 0.75rem;
-  font-size: 1.25rem;
+  padding: 0.9rem 2.5rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: block;
-  margin: 0 auto 4rem auto;
+  margin-top: 1.5rem;
+  box-shadow: 0 16px 24px rgba(47, 107, 255, 0.35);
 }
 
 .connectButton:hover {
-  background-color: #fbbf24;
+  transform: translateY(-2px);
+  box-shadow: 0 22px 30px rgba(47, 107, 255, 0.45);
 }
 
-.footer {
-  background-color: #1e3a8a;
-  color: white;
-  padding: 1.5rem;
-}
-
-.footerContent {
+.featureRow {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 1.5rem;
 }
 
-.footerLinks {
-  margin-bottom: 1rem;
+.featureHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.footerLink {
-  margin-bottom: 0.5rem;
-  display: block;
-  color: white;
-  text-decoration: none;
+.featureTitle {
+  font-size: 2rem;
+  font-weight: 700;
 }
 
-.footerLink:hover {
-  text-decoration: underline;
+.featureSubtitle {
+  color: var(--text-muted);
+  max-width: 36rem;
 }
 
-.contactInfo {
-  font-size: 0.875rem;
-  margin-top: 1rem;
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
-/* Media Queries */
-@media (min-width: 768px) {
-  .taglineContainer {
-    flex-direction: row;
-    justify-content: center;
-    gap: 1rem;
+.featureCard {
+  background: linear-gradient(
+      135deg,
+      rgba(47, 107, 255, 0.2),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.8);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: var(--shadow);
+}
+
+.featureTag {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.featureName {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.featureMeta {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
   }
 
-  .divider {
-    display: block;
+  .heroPanel {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 2.5rem 1.25rem 3.5rem;
   }
 
-  .tagline {
-    margin-bottom: 0;
+  .uploadSection {
+    padding: 2rem 1.5rem;
   }
 
-  .footerContent {
-    flex-direction: row;
-  }
-
-  .footerLinks {
-    margin-bottom: 0;
-  }
-
-  .contactInfo {
-    margin-top: 0;
+  .connectButton {
+    width: 100%;
   }
 }

@@ -25,26 +25,49 @@ export default function Landing() {
     <div className={styles.container}>
       {/* Main Content Area */}
       <main className={styles.main}>
-        {/* Logo and Tagline */}
-        <div className={styles.logoSection}>
-          <h1 className={styles.logoText}>
-            <span className={styles.labConnect}>LabConnect</span>{" "}
-            <span className={styles.ucsc}>UCSC</span>
-          </h1>
+        {/* Hero */}
+        <section className={styles.hero}>
+          <div className={styles.heroContent}>
+            <div className={styles.logoSection}>
+              <h1 className={styles.logoText}>
+                <span className={styles.brandSlug}>Slug</span>
+                <span className={styles.brandLabs}>Labs</span>
+              </h1>
 
-          <div className={styles.taglineContainer}>
-            <p className={styles.tagline}>
-              Discover Research, Unlock Opportunities
-            </p>
-            <div className={styles.divider}></div>
-            <p className={styles.tagline}>
-              The #1 spot to find research across UCSC
-            </p>
+              <p className={styles.heroLead}>
+                Streamlined access to UCSC research roles, matched to your
+                skills in minutes.
+              </p>
+
+              <div className={styles.badgeRow}>
+                <span className={styles.badge}>Personalized matches</span>
+                <span className={styles.badge}>Fast apply</span>
+                <span className={styles.badge}>Faculty verified</span>
+              </div>
+            </div>
           </div>
-        </div>
+
+          <div className={styles.heroPanel}>
+            <div className={styles.panelHeader}>New this week</div>
+            <div className={styles.panelBody}>
+              <div className={styles.panelCard}>
+                <p className={styles.panelTitle}>AI + Vision Labs</p>
+                <p className={styles.panelMeta}>7 openings • B.S. + M.S.</p>
+              </div>
+              <div className={styles.panelCard}>
+                <p className={styles.panelTitle}>Marine Genomics</p>
+                <p className={styles.panelMeta}>4 openings • Undergrad</p>
+              </div>
+              <div className={styles.panelCard}>
+                <p className={styles.panelTitle}>Quantum Materials</p>
+                <p className={styles.panelMeta}>5 openings • Ph.D.</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* File Upload Section */}
-        <div className={styles.uploadSection}>
+        <section className={styles.uploadSection}>
           <div>
             {/* Hidden file input */}
             <input
@@ -103,10 +126,39 @@ export default function Landing() {
           {/* Connect Button */}
           <div>
             <Link href="/directory" passHref>
-              <button className={styles.connectButton}>Connect!</button>
+              <button className={styles.connectButton}>
+                Start Matching
+              </button>
             </Link>
           </div>
-        </div>
+        </section>
+
+        <section className={styles.featureRow}>
+          <div className={styles.featureHeader}>
+            <h2 className={styles.featureTitle}>Trending on SlugLabs</h2>
+            <p className={styles.featureSubtitle}>
+              Dive into spotlight research areas and discover labs taking new
+              students now.
+            </p>
+          </div>
+          <div className={styles.featureGrid}>
+            <div className={styles.featureCard}>
+              <p className={styles.featureTag}>Blue-Gold Picks</p>
+              <h3 className={styles.featureName}>Systems + Security</h3>
+              <p className={styles.featureMeta}>12 labs • remote friendly</p>
+            </div>
+            <div className={styles.featureCard}>
+              <p className={styles.featureTag}>Gold Rush</p>
+              <h3 className={styles.featureName}>Biotech Innovation</h3>
+              <p className={styles.featureMeta}>9 labs • funded positions</p>
+            </div>
+            <div className={styles.featureCard}>
+              <p className={styles.featureTag}>Top Rated</p>
+              <h3 className={styles.featureName}>Climate Futures</h3>
+              <p className={styles.featureMeta}>6 labs • cross-discipline</p>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

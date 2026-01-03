@@ -602,9 +602,9 @@ export default function Directory() {
   // Custom styles for this page (extending module CSS)
   const customStyles = {
     header: {
-      backgroundColor: "white",
+      backgroundColor: "rgba(8, 12, 24, 0.9)",
       padding: "1rem",
-      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      boxShadow: "0 10px 30px rgba(2, 6, 23, 0.4)",
     } as const,
     headerContent: {
       display: "flex",
@@ -619,11 +619,11 @@ export default function Directory() {
       alignItems: "center",
     } as const,
     homeButton: {
-      backgroundColor: "#e2e8f0",
+      background: "rgba(47, 107, 255, 0.2)",
       padding: "0.5rem 1rem",
       borderRadius: "0.375rem",
-      color: "#4a5568",
-      border: "none",
+      color: "#e2e8f0",
+      border: "1px solid rgba(47, 107, 255, 0.35)",
       cursor: "pointer",
     } as const,
     pageContent: {
@@ -645,26 +645,32 @@ export default function Directory() {
       left: "0.75rem",
       top: "50%",
       transform: "translateY(-50%)",
-      color: "#a0aec0",
+      color: "#94a3b8",
     } as const,
     searchInput: {
       paddingLeft: "2.5rem",
       paddingRight: "0.75rem",
       paddingTop: "0.5rem",
       paddingBottom: "0.5rem",
-      border: "1px solid #e2e8f0",
-      borderRadius: "0.375rem",
+      border: "1px solid rgba(148, 163, 184, 0.2)",
+      borderRadius: "0.6rem",
       width: "100%",
+      backgroundColor: "rgba(15, 23, 42, 0.8)",
+      color: "#e2e8f0",
     } as const,
     contentLayout: {
       display: "flex",
       gap: "1.5rem",
+      flexWrap: "wrap",
     } as const,
     filtersPanel: {
-      width: "16rem",
-      backgroundColor: "#fef9c3",
-      borderRadius: "0.5rem",
+      width: "100%",
+      maxWidth: "18rem",
+      backgroundColor: "rgba(15, 23, 42, 0.85)",
+      borderRadius: "1rem",
       padding: "1rem",
+      border: "1px solid rgba(148, 163, 184, 0.2)",
+      color: "#e2e8f0",
     } as const,
     filterSection: {
       marginBottom: "1.5rem",
@@ -677,6 +683,7 @@ export default function Directory() {
     } as const,
     filterTitle: {
       fontWeight: "600",
+      color: "#e2e8f0",
     } as const,
     filterOptions: {
       display: "flex",
@@ -698,19 +705,21 @@ export default function Directory() {
       flex: "1",
     } as const,
     labsSection: {
-      backgroundColor: "#fef9c3",
-      borderRadius: "0.5rem",
+      backgroundColor: "rgba(15, 23, 42, 0.8)",
+      borderRadius: "1rem",
       padding: "1.5rem",
       marginBottom: "1.5rem",
+      border: "1px solid rgba(148, 163, 184, 0.18)",
+      boxShadow: "0 20px 40px rgba(2, 6, 23, 0.35)",
     } as const,
     sectionTitle: {
       fontSize: "1.5rem",
       fontWeight: "bold",
-      color: "#1a365d",
+      color: "#e2e8f0",
       marginBottom: "1rem",
     } as const,
     sectionDescription: {
-      color: "#4a5568",
+      color: "#94a3b8",
       marginBottom: "1rem",
     } as const,
     labsGrid: {
@@ -719,11 +728,11 @@ export default function Directory() {
       gap: "1.5rem",
     } as const,
     labCard: {
-      backgroundColor: "white",
-      borderRadius: "0.5rem",
+      backgroundColor: "rgba(17, 24, 39, 0.9)",
+      borderRadius: "0.9rem",
       overflow: "hidden",
-      boxShadow:
-        "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+      boxShadow: "0 18px 32px rgba(2, 6, 23, 0.35)",
+      border: "1px solid rgba(148, 163, 184, 0.18)",
     } as const,
     labCardContent: {
       padding: "1rem",
@@ -736,24 +745,24 @@ export default function Directory() {
     labName: {
       fontSize: "1.125rem",
       fontWeight: "bold",
-      color: "#1a365d",
+      color: "#e2e8f0",
     } as const,
     department: {
       fontSize: "0.875rem",
-      color: "#718096",
+      color: "#94a3b8",
       marginTop: "0.25rem",
     } as const,
     description: {
       marginTop: "0.5rem",
-      color: "#4a5568",
+      color: "#94a3b8",
     } as const,
     viewProfileButton: {
       marginTop: "1rem",
       width: "100%",
-      backgroundColor: "#1a365d",
+      background: "linear-gradient(120deg, #2f6bff, #0ea5e9)",
       color: "white",
       padding: "0.5rem",
-      borderRadius: "0.375rem",
+      borderRadius: "0.6rem",
       border: "none",
       cursor: "pointer",
     } as const,
@@ -768,10 +777,10 @@ export default function Directory() {
               style={{
                 fontSize: "1.875rem",
                 fontWeight: "bold",
-                color: "#1a365d",
+                color: "#e2e8f0",
               }}
             >
-              Recommended Labs
+              SlugLabs Picks
             </h2>
             <div style={customStyles.searchContainer}>
               <div style={customStyles.searchIcon}>
@@ -822,9 +831,11 @@ export default function Directory() {
                   style={{
                     width: "100%",
                     padding: "0.5rem",
-                    borderRadius: "0.375rem",
-                    border: "1px solid #e2e8f0",
+                    borderRadius: "0.6rem",
+                    border: "1px solid rgba(148, 163, 184, 0.2)",
                     marginBottom: "1rem",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    color: "#e2e8f0",
                   }}
                   onChange={(e) => toggleDepartmentFilter(e.target.value)}
                   value={
@@ -851,8 +862,10 @@ export default function Directory() {
                   style={{
                     width: "100%",
                     padding: "0.5rem",
-                    borderRadius: "0.375rem",
-                    border: "1px solid #e2e8f0",
+                    borderRadius: "0.6rem",
+                    border: "1px solid rgba(148, 163, 184, 0.2)",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    color: "#e2e8f0",
                   }}
                   onChange={(e) => toggleFocusFilter(e.target.value)}
                 >
@@ -874,9 +887,11 @@ export default function Directory() {
                   style={{
                     width: "100%",
                     padding: "0.5rem",
-                    borderRadius: "0.375rem",
-                    border: "1px solid #e2e8f0",
+                    borderRadius: "0.6rem",
+                    border: "1px solid rgba(148, 163, 184, 0.2)",
                     marginBottom: "1rem",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    color: "#e2e8f0",
                   }}
                   onChange={(e) => toggleMajorFilter(e.target.value)}
                 >
@@ -894,11 +909,11 @@ export default function Directory() {
             <div style={customStyles.labsContent}>
               <div style={customStyles.labsSection}>
                 <h3 style={customStyles.sectionTitle}>
-                  Recommended Labs for You
+                  SlugLabs Picks for You
                 </h3>
                 <p style={customStyles.sectionDescription}>
-                  Based on your transcript and resume, we recommend these labs
-                  as potential matches for your interests and skills.
+                  Based on your transcript and resume, we surface labs that
+                  match your interests and skills.
                 </p>
 
                 <div style={customStyles.labsGrid}>
