@@ -1,770 +1,208 @@
-// app/directory/page.tsx
-"use client"; // Mark this as a Client Component
+"use client";
 
-import React, { useState, useEffect } from "react";
-import styles from "../page.module.css"; // Import your CSS module for styling
-import Papa from "papaparse";
+import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import styles from "../page.module.css";
 
-interface Lab {
-  id: number;
-  name: string;
-  department: string;
-  description: string;
-  profName: string;
-  relevantMajors: string[];
-  focusAreas: string[];
-  assignedDepartments: string[];
-}
-
-interface CsvRow {
-  Name: string;
-  Department: string;
-  Description: string;
-  Professor: string;
-}
-
-interface Filters {
-  departments: {
-    [key: string]: boolean;
-  };
-  focus: {
-    [key: string]: boolean;
-  };
-  majors: {
-    [key: string]: boolean;
-  };
-}
-
-// Enhanced keyword mapping for better major-lab matching
-const majorKeywords: { [key: string]: string[] } = {
-  "Computer Science": [
-    "computer science",
-    "programming",
-    "software",
-    "algorithms",
-    "AI",
-    "machine learning",
-    "data science",
-    "artificial intelligence",
-    "computational",
-    "database",
-    "web development",
-    "cybersecurity",
-    "computer vision",
-    "natural language processing",
-  ],
-  "Electrical Engineering": [
-    "electrical",
-    "circuits",
-    "electronics",
-    "signal processing",
-    "embedded systems",
-    "power systems",
-    "microelectronics",
-    "control systems",
-    "semiconductor",
-    "VLSI",
-    "communications",
-    "RF",
-    "wireless",
-  ],
-  "Mechanical Engineering": [
-    "mechanical",
-    "robotics",
-    "dynamics",
-    "thermodynamics",
-    "materials",
-    "fluid mechanics",
-    "heat transfer",
-    "CAD",
-    "manufacturing",
-    "aerospace",
-    "automotive",
-    "biomechanics",
-    "mechatronics",
-  ],
-  "Chemical Engineering": [
-    "chemical",
-    "process",
-    "materials science",
-    "polymers",
-    "reaction engineering",
-    "separation processes",
-    "catalysis",
-    "biochemical",
-    "nanotechnology",
-    "electrochemistry",
-  ],
-  Biology: [
-    "biology",
-    "molecular",
-    "cellular",
-    "genetics",
-    "biochemistry",
-    "microbiology",
-    "immunology",
-    "neuroscience",
-    "physiology",
-    "biotechnology",
-    "genomics",
-    "proteomics",
-  ],
-  Chemistry: [
-    "chemistry",
-    "organic",
-    "inorganic",
-    "analytical",
-    "synthesis",
-    "physical chemistry",
-    "spectroscopy",
-    "materials chemistry",
-    "biochemistry",
-    "pharmaceutical",
-  ],
-  Physics: [
-    "physics",
-    "quantum",
-    "optics",
-    "mechanics",
-    "theoretical",
-    "astrophysics",
-    "particle physics",
-    "condensed matter",
-    "nuclear",
-    "plasma",
-    "computational physics",
-  ],
-  Mathematics: [
-    "mathematics",
-    "mathematical",
-    "statistics",
-    "computational",
-    "analysis",
-    "algebra",
-    "topology",
-    "probability",
-    "optimization",
-    "numerical methods",
-    "differential equations",
-  ],
+type Opportunity = {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  email: string;
+  requirements: string;
+  additionalInfo: string;
+  category: string;
 };
 
-// Add department keywords mapping
-const departmentKeywords: { [key: string]: string[] } = {
-  Science: ["science", "scientific", "research", "laboratory", "experimental"],
-  Technology: [
-    "technology",
-    "software",
-    "computing",
-    "digital",
-    "cyber",
-    "information",
-    "tech",
-  ],
-  Engineering: [
-    "engineering",
-    "design",
-    "systems",
-    "mechanical",
-    "electrical",
-    "chemical",
-    "civil",
-    "biomedical",
-  ],
-  Mathematics: [
-    "mathematics",
-    "mathematical",
-    "statistics",
-    "computational",
-    "numerical",
-    "algebraic",
-  ],
-  "Social Sciences": [
-    "social",
-    "psychology",
-    "sociology",
-    "economics",
-    "behavioral",
-    "cognitive",
-  ],
-  "Physical Sciences": [
-    "physics",
-    "chemistry",
-    "astronomy",
-    "geological",
-    "material",
-    "quantum",
-  ],
-  Biology: [
-    "biology",
-    "biological",
-    "molecular",
-    "cellular",
-    "genetic",
-    "organism",
-  ],
-  "Biomedical Sciences": [
-    "biomedical",
-    "medical",
-    "clinical",
-    "health",
-    "therapeutic",
-    "diagnostic",
-  ],
+type OpportunitiesResponse = {
+  updatedAt: string;
+  opportunities: Opportunity[];
 };
 
-// Enhanced analyzeLabForMajors function with weighted scoring
-const analyzeLabForMajors = (
-  description: string,
-  department: string
-): string[] => {
-  const scores: { [key: string]: number } = {};
-  const descriptionLower = description.toLowerCase();
-  const departmentLower = department.toLowerCase();
-
-  // Initialize scores
-  Object.keys(majorKeywords).forEach((major) => {
-    scores[major] = 0;
-
-    // Department exact match gets highest weight
-    if (departmentLower === major.toLowerCase()) {
-      scores[major] += 5;
-    }
-    // Department contains major name gets medium weight
-    else if (departmentLower.includes(major.toLowerCase())) {
-      scores[major] += 3;
-    }
-  });
-
-  // Score based on keywords in description with diminishing returns
-  Object.entries(majorKeywords).forEach(([major, keywords]) => {
-    const matches = new Set<string>();
-    keywords.forEach((keyword) => {
-      if (descriptionLower.includes(keyword.toLowerCase())) {
-        matches.add(keyword);
-      }
-    });
-    // Add score based on unique matches to prevent keyword spam
-    scores[major] += Math.min(matches.size, 5);
-  });
-
-  // Return majors with scores above threshold
-  const threshold = 2;
-  return Object.entries(scores)
-    .filter(([, score]) => score >= threshold)
-    .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
-    .map(([major]) => major);
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 };
 
-// Helper function to analyze lab description and extract focus areas
-const analyzeLabForFocus = (description: string): string[] => {
-  const focusKeywords: { [key: string]: string[] } = {
-    "Artificial Intelligence": [
-      "artificial intelligence",
-      "AI",
-      "machine learning",
-      "deep learning",
-      "neural networks",
-    ],
-    "Data Science": [
-      "data science",
-      "big data",
-      "analytics",
-      "statistical analysis",
-      "data mining",
-    ],
-    Biotechnology: [
-      "biotechnology",
-      "genetic engineering",
-      "molecular biology",
-      "cell culture",
-    ],
-    Robotics: ["robotics", "automation", "control systems", "mechatronics"],
-    "Materials Science": [
-      "materials",
-      "nanomaterials",
-      "polymers",
-      "composites",
-    ],
-    "Environmental Science": [
-      "environmental",
-      "sustainability",
-      "climate",
-      "ecology",
-    ],
-    "Quantum Computing": ["quantum", "quantum mechanics", "quantum computing"],
-    "Medical Research": [
-      "medical",
-      "biomedical",
-      "clinical",
-      "therapeutic",
-      "drug discovery",
-    ],
-  };
-
-  const focusAreas: string[] = [];
-  const descriptionLower = description.toLowerCase();
-
-  Object.entries(focusKeywords).forEach(([focus, keywords]) => {
-    if (keywords.some((keyword) => descriptionLower.includes(keyword))) {
-      focusAreas.push(focus);
-    }
+const formatDate = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
-
-  return focusAreas;
-};
-
-// Add function to analyze lab for departments
-const analyzeLabForDepartments = (
-  description: string,
-  labDepartment: string
-): string[] => {
-  const scores: { [key: string]: number } = {};
-  const descriptionLower = description.toLowerCase();
-  const labDepartmentLower = labDepartment.toLowerCase();
-
-  // Initialize scores
-  Object.keys(departmentKeywords).forEach((dept) => {
-    scores[dept] = 0;
-
-    // Department exact match gets highest weight
-    if (labDepartmentLower === dept.toLowerCase()) {
-      scores[dept] += 5;
-    }
-    // Department contains department name gets medium weight
-    else if (labDepartmentLower.includes(dept.toLowerCase())) {
-      scores[dept] += 3;
-    }
-  });
-
-  // Score based on keywords in description
-  Object.entries(departmentKeywords).forEach(([dept, keywords]) => {
-    const matches = new Set<string>();
-    keywords.forEach((keyword) => {
-      if (descriptionLower.includes(keyword.toLowerCase())) {
-        matches.add(keyword);
-      }
-    });
-    // Add score based on unique matches
-    scores[dept] += Math.min(matches.size, 5);
-  });
-
-  // Return departments with scores above threshold
-  const threshold = 2;
-  return Object.entries(scores)
-    .filter(([, score]) => score >= threshold)
-    .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
-    .map(([dept]) => dept);
 };
 
 export default function Directory() {
-  const [labs, setLabs] = useState<Lab[]>([]);
-  const [filteredLabs, setFilteredLabs] = useState<Lab[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filters, setFilters] = useState<Filters>({
-    departments: {
-      Science: false,
-      Technology: false,
-      Engineering: false,
-      Mathematics: false,
-      "Social Sciences": false,
-      "Physical Sciences": false,
-      Biology: false,
-      "Biomedical Sciences": false,
-    },
-    focus: {
-      "Artificial Intelligence": false,
-      "Data Science": false,
-      Biotechnology: false,
-      Robotics: false,
-      "Materials Science": false,
-      "Environmental Science": false,
-      "Quantum Computing": false,
-      "Medical Research": false,
-    },
-    majors: {
-      // Engineering
-      "Mechanical Engineering": false,
-      "Electrical Engineering": false,
-      "Chemical Engineering": false,
-      "Computer Engineering": false,
-      "Biomedical Engineering": false,
-      "Civil Engineering": false,
-      "Aerospace Engineering": false,
-      "Environmental Engineering": false,
-      "Materials Engineering": false,
-      "Industrial Engineering": false,
-      // Computer & Data Sciences
-      "Computer Science": false,
-      "Data Science": false,
-      "Software Engineering": false,
-      "Information Technology": false,
-      // Life Sciences
-      Biology: false,
-      Biochemistry: false,
-      "Molecular Biology": false,
-      Neuroscience: false,
-      Biotechnology: false,
-      // Physical Sciences
-      Physics: false,
-      Chemistry: false,
-      Astronomy: false,
-      "Earth Sciences": false,
-      // Mathematical Sciences
-      Mathematics: false,
-      "Applied Mathematics": false,
-      Statistics: false,
-      "Computational Mathematics": false,
-    },
-  });
-
-  // Fetch labs data
-  useEffect(() => {
-    const csvUrl =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmDz9hjnoVXz6sgthlfFxb9HLI8bNDqXa7VGPG1hgCTisC5i1N28FgWR0qmHqAHBepV1fE5_YpIbyq/pub?output=csv";
-
-    Papa.parse<CsvRow>(csvUrl, {
-      download: true,
-      header: true,
-      complete: (results) => {
-        const labsData = results.data.map((row, index) => {
-          const relevantMajors = analyzeLabForMajors(
-            row.Description,
-            row.Department
-          );
-          const focusAreas = analyzeLabForFocus(row.Description);
-          const assignedDepartments = analyzeLabForDepartments(
-            row.Description,
-            row.Department
-          );
-
-          return {
-            id: index + 1,
-            name: row.Name,
-            department: row.Department,
-            description: row.Description,
-            profName: row.Professor,
-            relevantMajors,
-            focusAreas,
-            assignedDepartments,
-          };
-        });
-        setLabs(labsData);
-        setFilteredLabs(labsData);
-      },
-    });
-  }, []); // Empty dependency array for loading once
-
-  // Update department filter for dropdown
-  const toggleDepartmentFilter = (department: string) => {
-    const newDepartments = Object.keys(filters.departments).reduce(
-      (acc, dept) => ({
-        ...acc,
-        [dept]: dept === department,
-      }),
-      {}
-    );
-
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      departments:
-        department === ""
-          ? Object.keys(prevFilters.departments).reduce(
-              (acc, dept) => ({
-                ...acc,
-                [dept]: false,
-              }),
-              {}
-            )
-          : newDepartments,
-    }));
-  };
-
-  // Update focus filter for dropdown
-  const toggleFocusFilter = (focus: string) => {
-    const newFocus = Object.keys(filters.focus).reduce(
-      (acc, f) => ({
-        ...acc,
-        [f]: f === focus, // Only set selected focus to true
-      }),
-      {}
-    );
-
-    setFilters({
-      ...filters,
-      focus:
-        focus === "" // If "All Focus Areas" is selected
-          ? Object.keys(filters.focus).reduce(
-              (acc, f) => ({
-                ...acc,
-                [f]: false,
-              }),
-              {}
-            )
-          : newFocus,
-    });
-  };
-
-  // Add major filter toggle function
-  const toggleMajorFilter = (major: string) => {
-    const newMajors = Object.keys(filters.majors).reduce(
-      (acc, m) => ({
-        ...acc,
-        [m]: m === major, // Only set selected major to true
-      }),
-      {}
-    );
-
-    setFilters({
-      ...filters,
-      majors:
-        major === "" // If "All Majors" is selected
-          ? Object.keys(filters.majors).reduce(
-              (acc, m) => ({
-                ...acc,
-                [m]: false,
-              }),
-              {}
-            )
-          : newMajors,
-    });
-  };
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   useEffect(() => {
-    // Define filterLabs inside the effect
-    const filterLabs = (term: string) => {
-      const filtered = labs.filter((lab) => {
-        // Search term matching
-        const searchMatch =
-          !term ||
-          [
-            lab.name,
-            lab.department,
-            lab.description,
-            lab.profName,
-            ...lab.relevantMajors,
-            ...lab.focusAreas,
-          ].some((field) => field?.toLowerCase().includes(term.toLowerCase()));
-
-        // Get active filters
-        const selectedDepartment = Object.entries(filters.departments).find(
-          ([, isSelected]) => isSelected
-        )?.[0];
-        const selectedFocus = Object.entries(filters.focus).find(
-          ([, isSelected]) => isSelected
-        )?.[0];
-        const selectedMajor = Object.entries(filters.majors).find(
-          ([, isSelected]) => isSelected
-        )?.[0];
-
-        // Department matching using assigned departments
-        const departmentMatch =
-          !selectedDepartment ||
-          lab.assignedDepartments.includes(selectedDepartment);
-
-        // Focus and major matching
-        const focusMatch =
-          !selectedFocus || lab.focusAreas.includes(selectedFocus);
-        const majorMatch =
-          !selectedMajor || lab.relevantMajors.includes(selectedMajor);
-
-        return searchMatch && departmentMatch && focusMatch && majorMatch;
-      });
-
-      // Sort results by department relevance if department is selected
-      const selectedDepartment = Object.entries(filters.departments).find(
-        ([, isSelected]) => isSelected
-      )?.[0];
-
-      if (selectedDepartment) {
-        filtered.sort((a, b) => {
-          const aIndex = a.assignedDepartments.indexOf(selectedDepartment);
-          const bIndex = b.assignedDepartments.indexOf(selectedDepartment);
-          // Put exact matches first, then sort by presence in assignedDepartments
-          if (aIndex === -1 && bIndex === -1) return 0;
-          if (aIndex === -1) return 1;
-          if (bIndex === -1) return -1;
-          return aIndex - bIndex;
-        });
+    let isMounted = true;
+    const loadOpportunities = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/research-opportunities");
+        if (!response.ok) {
+          throw new Error("Unable to load opportunities right now.");
+        }
+        const data = (await response.json()) as OpportunitiesResponse;
+        if (!isMounted) return;
+        setOpportunities(data.opportunities ?? []);
+        setUpdatedAt(data.updatedAt ?? null);
+        setError(null);
+      } catch (err) {
+        if (!isMounted) return;
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load opportunities right now."
+        );
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setFilteredLabs(filtered);
     };
 
-    // Call the function
-    filterLabs(searchTerm);
-  }, [searchTerm, filters.departments, filters.focus, filters.majors, labs]);
-  // Handle search input changes
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+    loadOpportunities();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  // Custom styles for this page (extending module CSS)
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return opportunities;
+    return opportunities.filter((item) => {
+      return [
+        item.title,
+        item.source,
+        item.email,
+        item.requirements,
+        item.additionalInfo,
+      ].some((field) => field.toLowerCase().includes(term));
+    });
+  }, [opportunities, searchTerm]);
+
   const customStyles = {
-    header: {
-      backgroundColor: "rgba(8, 12, 24, 0.9)",
-      padding: "1rem",
-      boxShadow: "0 10px 30px rgba(2, 6, 23, 0.4)",
-    } as const,
-    headerContent: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "0 1rem",
-    } as const,
-    logo: {
-      display: "flex",
-      alignItems: "center",
-    } as const,
-    homeButton: {
-      background: "rgba(47, 107, 255, 0.2)",
-      padding: "0.5rem 1rem",
-      borderRadius: "0.375rem",
-      color: "#e2e8f0",
-      border: "1px solid rgba(47, 107, 255, 0.35)",
-      cursor: "pointer",
-    } as const,
     pageContent: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "1.5rem 1rem",
+      width: "100%",
+      margin: 0,
+      padding: 0,
     } as const,
     pageHeader: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
+      flexWrap: "wrap",
+      gap: "1rem",
       marginBottom: "1.5rem",
     } as const,
-    searchContainer: {
-      position: "relative",
+    title: {
+      fontSize: "2.4rem",
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      textTransform: "uppercase",
     } as const,
-    searchIcon: {
-      position: "absolute",
-      left: "0.75rem",
-      top: "50%",
-      transform: "translateY(-50%)",
+    subtitle: {
+      color: "#94a3b8",
+      maxWidth: "34rem",
+      marginTop: "0.5rem",
+    } as const,
+    updatedAt: {
+      fontSize: "0.75rem",
+      textTransform: "uppercase",
+      letterSpacing: "0.16em",
       color: "#94a3b8",
     } as const,
     searchInput: {
-      paddingLeft: "2.5rem",
-      paddingRight: "0.75rem",
-      paddingTop: "0.5rem",
-      paddingBottom: "0.5rem",
+      paddingLeft: "1rem",
+      paddingRight: "1rem",
+      paddingTop: "0.6rem",
+      paddingBottom: "0.6rem",
       border: "1px solid rgba(148, 163, 184, 0.2)",
       borderRadius: "0.6rem",
       width: "100%",
       backgroundColor: "rgba(15, 23, 42, 0.8)",
       color: "#e2e8f0",
     } as const,
-    contentLayout: {
-      display: "flex",
-      gap: "1.5rem",
-      flexWrap: "wrap",
-    } as const,
-    filtersPanel: {
+    searchWrap: {
+      maxWidth: "420px",
       width: "100%",
-      maxWidth: "18rem",
+    } as const,
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+      gap: "1.5rem",
+      marginTop: "2rem",
+    } as const,
+    card: {
       backgroundColor: "rgba(15, 23, 42, 0.85)",
-      borderRadius: "1rem",
-      padding: "1rem",
-      border: "1px solid rgba(148, 163, 184, 0.2)",
-      color: "#e2e8f0",
-    } as const,
-    filterSection: {
-      marginBottom: "1.5rem",
-    } as const,
-    filterHeader: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "0.5rem",
-    } as const,
-    filterTitle: {
-      fontWeight: "600",
-      color: "#e2e8f0",
-    } as const,
-    filterOptions: {
+      border: "1px solid rgba(148, 163, 184, 0.18)",
+      borderRadius: "1.25rem",
+      padding: "1.5rem",
       display: "flex",
       flexDirection: "column",
-      gap: "0.5rem",
+      gap: "0.75rem",
+      minHeight: "230px",
+      boxShadow: "0 18px 40px rgba(2, 6, 23, 0.35)",
     } as const,
-    filterOption: {
+    categoryBadge: {
+      backgroundColor: "rgba(245, 197, 66, 0.2)",
+      color: "#f5c526",
+      padding: "0.2rem 0.5rem",
+      borderRadius: "999px",
+      fontWeight: 700,
+      fontSize: "0.65rem",
+      letterSpacing: "0.2em",
+    } as const,
+    cardTitle: {
+      fontSize: "1.15rem",
+      fontWeight: 700,
+      color: "#e2e8f0",
+    } as const,
+    cardText: {
+      fontSize: "0.95rem",
+      color: "#cbd5f5",
+      lineHeight: 1.5,
+    } as const,
+    cardButtons: {
+      marginTop: "auto",
       display: "flex",
-      alignItems: "center",
+      gap: "0.75rem",
+      flexWrap: "wrap",
     } as const,
-    checkbox: {
-      marginRight: "0.5rem",
+    profileButton: {
+      background: "linear-gradient(120deg, #2f6bff, #0ea5e9)",
+      border: "none",
+      color: "#fff",
+      padding: "0.6rem 1.1rem",
+      borderRadius: "0.75rem",
+      fontWeight: 700,
+      cursor: "pointer",
     } as const,
-    fundingRange: {
-      display: "flex",
-      justifyContent: "space-between",
+    postingButton: {
+      background: "linear-gradient(120deg, #f5c526, #f8e08a)",
+      border: "none",
+      color: "#0b1120",
+      padding: "0.6rem 1.1rem",
+      borderRadius: "0.75rem",
+      fontWeight: 700,
+      cursor: "pointer",
     } as const,
-    labsContent: {
-      flex: "1",
-    } as const,
-    labsSection: {
-      backgroundColor: "rgba(15, 23, 42, 0.8)",
+    emptyState: {
+      border: "1px dashed rgba(148, 163, 184, 0.3)",
       borderRadius: "1rem",
       padding: "1.5rem",
-      marginBottom: "1.5rem",
-      border: "1px solid rgba(148, 163, 184, 0.18)",
-      boxShadow: "0 20px 40px rgba(2, 6, 23, 0.35)",
-    } as const,
-    sectionTitle: {
-      fontSize: "1.5rem",
-      fontWeight: "bold",
-      color: "#e2e8f0",
-      marginBottom: "1rem",
-    } as const,
-    sectionDescription: {
       color: "#94a3b8",
-      marginBottom: "1rem",
-    } as const,
-    labsGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-      gap: "1.5rem",
-    } as const,
-    labCard: {
-      backgroundColor: "rgba(17, 24, 39, 0.9)",
-      borderRadius: "0.9rem",
-      overflow: "hidden",
-      boxShadow: "0 18px 32px rgba(2, 6, 23, 0.35)",
-      border: "1px solid rgba(148, 163, 184, 0.18)",
-    } as const,
-    labCardContent: {
-      padding: "1rem",
-    } as const,
-    labCardHeader: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-    } as const,
-    labName: {
-      fontSize: "1.125rem",
-      fontWeight: "bold",
-      color: "#e2e8f0",
-    } as const,
-    department: {
-      fontSize: "0.875rem",
-      color: "#94a3b8",
-      marginTop: "0.25rem",
-    } as const,
-    description: {
-      marginTop: "0.5rem",
-      color: "#94a3b8",
-    } as const,
-    viewProfileButton: {
-      marginTop: "1rem",
-      width: "100%",
-      background: "linear-gradient(120deg, #2f6bff, #0ea5e9)",
-      color: "white",
-      padding: "0.5rem",
-      borderRadius: "0.6rem",
-      border: "none",
-      cursor: "pointer",
+      marginTop: "1.5rem",
+      backgroundColor: "rgba(15, 23, 42, 0.6)",
     } as const,
   };
 
@@ -773,169 +211,63 @@ export default function Directory() {
       <main className={styles.main}>
         <div style={customStyles.pageContent}>
           <div style={customStyles.pageHeader}>
-            <h2
-              style={{
-                fontSize: "1.875rem",
-                fontWeight: "bold",
-                color: "#e2e8f0",
-              }}
-            >
-              SlugLabs Picks
-            </h2>
-            <div style={customStyles.searchContainer}>
-              <div style={customStyles.searchIcon}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+            <div>
+              <h1 style={customStyles.title}>UCSC Research Opportunities</h1>
+              <p style={customStyles.subtitle}>
+                AI-narrowed listings with contact emails, requirements, and a
+                direct link to the official posting.
+              </p>
+            </div>
+            <div style={customStyles.searchWrap}>
               <input
-                type="text"
-                name="search"
-                id="search"
-                value={searchTerm}
-                onChange={handleSearch}
                 style={customStyles.searchInput}
-                placeholder="Search for labs..."
+                placeholder="Search by lab, requirement, or contact"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {updatedAt && (
+                <div style={customStyles.updatedAt}>
+                  Updated {formatDate(updatedAt)}
+                </div>
+              )}
             </div>
           </div>
 
-          <div style={customStyles.contentLayout}>
-            {/* Filters Panel */}
-            <div style={customStyles.filtersPanel}>
-              <h3
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "bold",
-                  marginBottom: "1rem",
-                }}
-              >
-                Filters:
-              </h3>
-
-              {/* Department Filter Dropdown */}
-              <div style={customStyles.filterSection}>
-                <div style={customStyles.filterHeader}>
-                  <h4 style={customStyles.filterTitle}>Department</h4>
-                </div>
-                <select
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem",
-                    borderRadius: "0.6rem",
-                    border: "1px solid rgba(148, 163, 184, 0.2)",
-                    marginBottom: "1rem",
-                    backgroundColor: "rgba(15, 23, 42, 0.9)",
-                    color: "#e2e8f0",
-                  }}
-                  onChange={(e) => toggleDepartmentFilter(e.target.value)}
-                  value={
-                    Object.entries(filters.departments).find(
-                      ([, isSelected]) => isSelected
-                    )?.[0] || ""
-                  }
-                >
-                  <option value="">All Departments</option>
-                  {Object.keys(filters.departments).map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Focus Filter Dropdown */}
-              <div style={customStyles.filterSection}>
-                <div style={customStyles.filterHeader}>
-                  <h4 style={customStyles.filterTitle}>Focus</h4>
-                </div>
-                <select
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem",
-                    borderRadius: "0.6rem",
-                    border: "1px solid rgba(148, 163, 184, 0.2)",
-                    backgroundColor: "rgba(15, 23, 42, 0.9)",
-                    color: "#e2e8f0",
-                  }}
-                  onChange={(e) => toggleFocusFilter(e.target.value)}
-                >
-                  <option value="">All Focus Areas</option>
-                  {Object.keys(filters.focus).map((focus) => (
-                    <option key={focus} value={focus}>
-                      {focus}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Major Filter Dropdown */}
-              <div style={customStyles.filterSection}>
-                <div style={customStyles.filterHeader}>
-                  <h4 style={customStyles.filterTitle}>Major</h4>
-                </div>
-                <select
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem",
-                    borderRadius: "0.6rem",
-                    border: "1px solid rgba(148, 163, 184, 0.2)",
-                    marginBottom: "1rem",
-                    backgroundColor: "rgba(15, 23, 42, 0.9)",
-                    color: "#e2e8f0",
-                  }}
-                  onChange={(e) => toggleMajorFilter(e.target.value)}
-                >
-                  <option value="">All Majors</option>
-                  {Object.keys(filters.majors).map((major) => (
-                    <option key={major} value={major}>
-                      {major}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {loading ? (
+            <div style={customStyles.emptyState}>Loading opportunities...</div>
+          ) : error ? (
+            <div style={customStyles.emptyState}>{error}</div>
+          ) : filtered.length === 0 ? (
+            <div style={customStyles.emptyState}>
+              No matching opportunities found.
             </div>
-
-            {/* Labs Grid */}
-            <div style={customStyles.labsContent}>
-              <div style={customStyles.labsSection}>
-                <h3 style={customStyles.sectionTitle}>
-                  SlugLabs Picks for You
-                </h3>
-                <p style={customStyles.sectionDescription}>
-                  Based on your transcript and resume, we surface labs that
-                  match your interests and skills.
-                </p>
-
-                <div style={customStyles.labsGrid}>
-                  {filteredLabs.map((lab) => (
-                    <div key={lab.id} style={customStyles.labCard}>
-                      <div style={customStyles.labCardContent}>
-                        <div style={customStyles.labCardHeader}>
-                          <h4 style={customStyles.labName}>{lab.name}</h4>
-                        </div>
-                        <p style={customStyles.department}>{lab.department}</p>
-                        <a href={`/directory/${lab.id}`}>
-                          <button style={customStyles.viewProfileButton}>
-                            View Profile
-                          </button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
+          ) : (
+            <div style={customStyles.grid}>
+              {filtered.map((item) => (
+                <div key={item.id} style={customStyles.card}>
+                  <div style={customStyles.categoryBadge}>{item.category}</div>
+                  <div style={customStyles.cardTitle}>
+                    {truncateText(item.title, 50)}
+                  </div>
+                  <div style={customStyles.cardText}>
+                    {truncateText(item.additionalInfo, 100)}
+                  </div>
+                  <div style={customStyles.cardButtons}>
+                    <Link href={`/directory/${item.id}`} passHref>
+                      <button style={customStyles.profileButton}>
+                        View profile
+                      </button>
+                    </Link>
+                    <a href={item.url} target="_blank" rel="noreferrer">
+                      <button style={customStyles.postingButton}>
+                        Official posting
+                      </button>
+                    </a>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

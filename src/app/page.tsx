@@ -1,11 +1,50 @@
 "use client"; // Required for Next.js when using state/hooks in app directory
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
+type ResearchOpportunity = {
+  title: string;
+  url: string;
+  source: string;
+  email: string;
+  requirements: string;
+  additionalInfo: string;
+};
+
+type OpportunitiesResponse = {
+  updatedAt: string;
+  opportunities: ResearchOpportunity[];
+};
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
+};
+
+const formatDate = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export default function Landing() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [opportunities, setOpportunities] = useState<ResearchOpportunity[]>([]);
+  const [opportunitiesUpdated, setOpportunitiesUpdated] = useState<
+    string | null
+  >(null);
+  const [opportunitiesLoading, setOpportunitiesLoading] = useState(true);
+  const [opportunitiesError, setOpportunitiesError] = useState<string | null>(
+    null
+  );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -20,6 +59,40 @@ export default function Landing() {
   const handleRemoveFile = () => {
     setSelectedFile(null);
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadOpportunities = async () => {
+      try {
+        setOpportunitiesLoading(true);
+        const response = await fetch("/api/research-opportunities");
+        if (!response.ok) {
+          throw new Error("Unable to load opportunities right now.");
+        }
+        const data = (await response.json()) as OpportunitiesResponse;
+        if (!isMounted) return;
+        setOpportunities(data.opportunities ?? []);
+        setOpportunitiesUpdated(data.updatedAt ?? null);
+        setOpportunitiesError(null);
+      } catch (error) {
+        if (!isMounted) return;
+        setOpportunitiesError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load opportunities right now."
+        );
+      } finally {
+        if (isMounted) {
+          setOpportunitiesLoading(false);
+        }
+      }
+    };
+
+    loadOpportunities();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -157,6 +230,57 @@ export default function Landing() {
               <p className={styles.featureMeta}>6 labs • cross-discipline</p>
             </div>
           </div>
+        </section>
+
+        <section className={styles.oppsSection}>
+          <div className={styles.oppsHeader}>
+            <div>
+              <h2 className={styles.oppsTitle}>
+                Latest UCSC research opportunities
+              </h2>
+              <p className={styles.oppsSubtitle}>
+                Pulled from official ucsc.edu postings so students can jump
+                straight to the source.
+              </p>
+            </div>
+            {opportunitiesUpdated && (
+              <span className={styles.oppsUpdated}>
+                Updated {formatDate(opportunitiesUpdated)}
+              </span>
+            )}
+          </div>
+
+          {opportunitiesLoading ? (
+            <div className={styles.oppsEmpty}>Loading opportunities...</div>
+          ) : opportunitiesError ? (
+            <div className={styles.oppsEmpty}>{opportunitiesError}</div>
+          ) : opportunities.length === 0 ? (
+            <div className={styles.oppsEmpty}>
+              No opportunities found right now.
+            </div>
+          ) : (
+            <div className={styles.oppsGrid}>
+              {opportunities.map((item) => (
+                <a
+                  key={item.url}
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.oppsCard}
+                >
+                  <h3 className={styles.oppsCardTitle}>
+                    {truncateText(item.title, 50)}
+                  </h3>
+                  <p className={styles.oppsCardSummary}>
+                    {truncateText(item.additionalInfo, 100)}
+                  </p>
+                  <span className={styles.oppsLink}>
+                    View official posting
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>

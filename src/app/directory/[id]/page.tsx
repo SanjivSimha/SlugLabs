@@ -2,90 +2,108 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import styles from "../../page.module.css"; // Ensure this path is correct
-import Papa from "papaparse";
 
-interface Lab {
-  id: number;
-  department: string;
-  professor: string;
-  contact: string;
-  name: string;
-  major: string;
-  applicationLink: string;
-  description: string;
+interface Opportunity {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  email: string;
+  requirements: string;
+  additionalInfo: string;
+  category: string;
 }
 
-interface CsvRow {
-  Department: string;
-  Professor: string;
-  Contact: string;
-  Name: string;
-  Major: string;
-  Apply: string;
-  Description: string;
-}
+type OpportunityResponse = {
+  opportunity: Opportunity;
+};
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
+};
 
 export default function LabProfile() {
   const { id } = useParams();
-  const [lab, setLab] = useState<Lab | null>(null);
+  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const csvUrl =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmDz9hjnoVXz6sgthlfFxb9HLI8bNDqXa7VGPG1hgCTisC5i1N28FgWR0qmHqAHBepV1fE5_YpIbyq/pub?output=csv";
+    let isMounted = true;
+    const loadOpportunity = async () => {
+      try {
+        const response = await fetch(
+          `/api/research-opportunities?id=${encodeURIComponent(String(id))}`
+        );
+        if (!response.ok) {
+          throw new Error("Unable to load opportunity.");
+        }
+        const data = (await response.json()) as OpportunityResponse;
+        if (!isMounted) return;
+        setOpportunity(data.opportunity ?? null);
+        setError(null);
+      } catch (err) {
+        if (!isMounted) return;
+        setError(
+          err instanceof Error ? err.message : "Unable to load opportunity."
+        );
+      }
+    };
 
-    Papa.parse<CsvRow>(csvUrl, {
-      download: true,
-      header: true,
-      complete: (results) => {
-        const labs: Lab[] = results.data.map((row, index) => ({
-          id: index + 1,
-          department: row.Department || "Unknown",
-          professor: row.Professor || "Unknown",
-          contact: row.Contact || "N/A",
-          name: row.Name || "Unknown",
-          major: row.Major || "N/A",
-          applicationLink: row.Apply || "#",
-          description: row.Description || "No description available.",
-        }));
+    if (id) {
+      loadOpportunity();
+    }
 
-        const foundLab = labs.find((lab) => lab.id === Number(id));
-        setLab(foundLab || null);
-      },
-    });
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  if (!lab) {
-    return <p className={styles.loading}>Loading lab details...</p>;
+  if (error) {
+    return <p style={{ padding: "2rem" }}>{error}</p>;
   }
+
+  if (!opportunity) {
+    return <p style={{ padding: "2rem" }}>Loading opportunity...</p>;
+  }
+
   return (
     <div className="page-container">
       <div className="container">
         <div className="main-content">
           <div className="left-column">
-            <h2>{lab.name}</h2>
-            <div className="lab-description">{lab.description}</div>
+            <h2>{truncateText(opportunity.title, 50)}</h2>
+            <div className="lab-description">
+              {truncateText(opportunity.additionalInfo, 100)}
+            </div>
             <div className="contact-details">
-              <div className="section-title">Contact Details</div>
-              <div>Email: {lab.contact}</div>
-              {lab.professor && <div>Professor: {lab.professor}</div>}
+              <div className="section-title">Requirements</div>
+              <div>{opportunity.requirements}</div>
+            </div>
+            <div className="contact-details">
+              <div className="section-title">Contact</div>
+              <div>Email: {opportunity.email}</div>
+              <div>Category: {opportunity.category}</div>
             </div>
           </div>
 
           <div className="right-column">
             <div className="right-buttons">
               <a
-                href={lab.applicationLink}
+                href={opportunity.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="apply-button"
               >
-                Apply!
+                Official posting
               </a>
-              <a href={`mailto:${lab.contact}`} className="contact-lab-button">
-                Contact Lab!
+              <a
+                href={`mailto:${opportunity.email}`}
+                className="contact-lab-button"
+              >
+                Contact lab
               </a>
-              <a href="./" className="back-button">
+              <a href="/directory" className="back-button">
                 Back to SlugLabs Directory
               </a>
             </div>
@@ -108,36 +126,6 @@ export default function LabProfile() {
           width: 100%;
           border-radius: 24px;
           border: 1px solid rgba(148, 163, 184, 0.18);
-        }
-        .header {
-          background-color: rgba(8, 12, 24, 0.9);
-          padding: 15px 20px;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .logo {
-          display: flex;
-          align-items: center;
-        }
-        .logo-text-lab {
-          color: #e2e8f0;
-          font-size: 28px;
-          font-weight: bold;
-        }
-        .logo-text-ucsc {
-          color: #f5c526;
-          font-size: 28px;
-          font-weight: bold;
-        }
-        .nav-button {
-          background-color: rgba(47, 107, 255, 0.2);
-          padding: 5px 15px;
-          border-radius: 5px;
-          color: #e2e8f0;
-          text-decoration: none;
-          font-size: 16px;
         }
         .main-content {
           display: grid;
@@ -252,12 +240,6 @@ export default function LabProfile() {
         .back-button:hover {
           background-color: rgba(148, 163, 184, 0.2);
           color: #f8fafc;
-        }
-        .loading {
-          text-align: center;
-          padding: 50px;
-          font-size: 20px;
-          color: #94a3b8;
         }
         @media (max-width: 900px) {
           .main-content {
