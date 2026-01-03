@@ -93,7 +93,19 @@
   margin-bottom: 1.5rem;
 }
 
+<<<<<<< HEAD
 .panelBody {
+=======
+.slug {
+  color: #2D5C34;
+}
+
+.labs {
+  color: #8CC63F;
+}
+
+.taglineContainer {
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -125,12 +137,21 @@
 }
 
 .uploadButton {
+<<<<<<< HEAD
   background: linear-gradient(120deg, var(--gold), #f8e08a);
   color: #0b1120;
   font-weight: 700;
   padding: 0.9rem 1.75rem;
   border-radius: 999px;
   display: inline-flex;
+=======
+  background-color: #F3F2DF;
+  color: #2D5C34;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -141,8 +162,12 @@
 }
 
 .uploadButton:hover {
+<<<<<<< HEAD
   transform: translateY(-2px);
   box-shadow: 0 18px 30px rgba(245, 197, 66, 0.4);
+=======
+  background-color: #cdccbc;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
 }
 
 .uploadIcon {
@@ -155,6 +180,7 @@
 }
 
 .fileContainer {
+<<<<<<< HEAD
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.6);
@@ -172,12 +198,29 @@
 
 .fileContent {
   padding: 1rem 1.25rem;
+=======
+  border: 1px solid #8CC63F;
+  border-radius: 0.25rem;
+}
+
+.fileHeader {
+  background-color: #F3F2DF;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.fileContent {
+  background-color: #F3F2DF;
+  padding: 1rem;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
 
+<<<<<<< HEAD
 .fileName {
   font-size: 0.95rem;
   color: var(--text);
@@ -185,6 +228,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+=======
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
 
 .deleteButton {
   color: var(--text-muted);
@@ -203,12 +248,21 @@
 }
 
 .connectButton {
+<<<<<<< HEAD
   background: linear-gradient(120deg, var(--blue), #0ea5e9);
   color: white;
   font-weight: 700;
   padding: 0.9rem 2.5rem;
   border-radius: 14px;
   font-size: 1.1rem;
+=======
+  background-color: #2d5c3484;
+  color: #ffffff;
+  font-weight: 400;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -218,8 +272,12 @@
 }
 
 .connectButton:hover {
+<<<<<<< HEAD
   transform: translateY(-2px);
   box-shadow: 0 22px 30px rgba(47, 107, 255, 0.45);
+=======
+  background-color: #2d5c34bb;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
 }
 
 .featureRow {

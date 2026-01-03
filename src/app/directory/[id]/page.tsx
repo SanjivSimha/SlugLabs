@@ -122,7 +122,11 @@ export default function LabProfile() {
           align-items: center;
         }
         .logo-text-lab {
+<<<<<<< HEAD
           color: #e2e8f0;
+=======
+          color: #2D5C34;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
           font-size: 28px;
           font-weight: bold;
         }
@@ -162,9 +166,13 @@ export default function LabProfile() {
           font-size: 2.5rem;
           margin-top: 0;
           margin-bottom: 20px;
+<<<<<<< HEAD
           color: #e2e8f0;
           letter-spacing: 0.06em;
           text-transform: uppercase;
+=======
+          color: #2d5c34;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
         }
         .lab-description {
           margin-bottom: 30px;
@@ -177,9 +185,13 @@ export default function LabProfile() {
           font-weight: bold;
           margin-top: 20px;
           margin-bottom: 15px;
+<<<<<<< HEAD
           color: #f5c526;
           text-transform: uppercase;
           letter-spacing: 0.12em;
+=======
+          color: #2d5c34,;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
         }
         .contact-details {
           margin-bottom: 30px;
@@ -197,9 +209,15 @@ export default function LabProfile() {
         .apply-button {
           display: block;
           width: 90%;
+<<<<<<< HEAD
           background: linear-gradient(120deg, #f5c526, #f8e08a);
           border: none;
           color: #0b1120;
+=======
+          background-color: #8cc63f;
+          border: none;
+          color: white;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
           padding: 12px 20px;
           border-radius: 12px;
           text-align: center;
@@ -217,7 +235,11 @@ export default function LabProfile() {
         .contact-lab-button {
           display: block;
           width: 90%;
+<<<<<<< HEAD
           background: linear-gradient(120deg, #2f6bff, #0ea5e9);
+=======
+          background-color: #2d5c34;
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
           border: none;
           color: white;
           padding: 12px 20px;

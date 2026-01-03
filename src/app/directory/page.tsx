@@ -664,6 +664,7 @@ export default function Directory() {
       flexWrap: "wrap",
     } as const,
     filtersPanel: {
+<<<<<<< HEAD
       width: "100%",
       maxWidth: "18rem",
       backgroundColor: "rgba(15, 23, 42, 0.85)",
@@ -671,6 +672,13 @@ export default function Directory() {
       padding: "1rem",
       border: "1px solid rgba(148, 163, 184, 0.2)",
       color: "#e2e8f0",
+=======
+      width: "16rem",
+      backgroundColor: "#f3f2df",
+      borderRadius: "0.5rem",
+      padding: "1rem",
+      color: "#2d5c34",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
     } as const,
     filterSection: {
       marginBottom: "1.5rem",
@@ -682,6 +690,7 @@ export default function Directory() {
       marginBottom: "0.5rem",
     } as const,
     filterTitle: {
+      color: "#2d5c34",
       fontWeight: "600",
       color: "#e2e8f0",
     } as const,
@@ -705,8 +714,13 @@ export default function Directory() {
       flex: "1",
     } as const,
     labsSection: {
+<<<<<<< HEAD
       backgroundColor: "rgba(15, 23, 42, 0.8)",
       borderRadius: "1rem",
+=======
+      backgroundColor: "#f3f2df",
+      borderRadius: "0.5rem",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
       padding: "1.5rem",
       marginBottom: "1.5rem",
       border: "1px solid rgba(148, 163, 184, 0.18)",
@@ -715,11 +729,19 @@ export default function Directory() {
     sectionTitle: {
       fontSize: "1.5rem",
       fontWeight: "bold",
+<<<<<<< HEAD
       color: "#e2e8f0",
       marginBottom: "1rem",
     } as const,
     sectionDescription: {
       color: "#94a3b8",
+=======
+      color: "#2d5c34",
+      marginBottom: "1rem",
+    } as const,
+    sectionDescription: {
+      color: "#2d5c34",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
       marginBottom: "1rem",
     } as const,
     labsGrid: {
@@ -745,21 +767,37 @@ export default function Directory() {
     labName: {
       fontSize: "1.125rem",
       fontWeight: "bold",
+<<<<<<< HEAD
       color: "#e2e8f0",
     } as const,
     department: {
       fontSize: "0.875rem",
       color: "#94a3b8",
+=======
+      color: "#2d5c34",
+    } as const,
+    department: {
+      fontSize: "0.875rem",
+      color: "#2d5c34",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
       marginTop: "0.25rem",
     } as const,
     description: {
       marginTop: "0.5rem",
+<<<<<<< HEAD
       color: "#94a3b8",
+=======
+      color: "#2d5c34",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
     } as const,
     viewProfileButton: {
       marginTop: "1rem",
       width: "100%",
+<<<<<<< HEAD
       background: "linear-gradient(120deg, #2f6bff, #0ea5e9)",
+=======
+      backgroundColor: "#8cc63f",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
       color: "white",
       padding: "0.5rem",
       borderRadius: "0.6rem",
@@ -777,7 +815,11 @@ export default function Directory() {
               style={{
                 fontSize: "1.875rem",
                 fontWeight: "bold",
+<<<<<<< HEAD
                 color: "#e2e8f0",
+=======
+                color: "#2d5c34",
+>>>>>>> d04ea89d2a2b1ef2cebd4df424c6e3ed115a1234
               }}
             >
               SlugLabs Picks
