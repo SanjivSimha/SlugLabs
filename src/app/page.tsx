@@ -1,6 +1,6 @@
 "use client"; // Required for Next.js when using state/hooks in app directory
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -17,6 +17,8 @@ type OpportunitiesResponse = {
   updatedAt: string;
   opportunities: ResearchOpportunity[];
 };
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const truncateText = (value: string, maxLength: number) => {
   if (value.length <= maxLength) return value;
@@ -45,6 +47,7 @@ export default function Landing() {
   const [opportunitiesError, setOpportunitiesError] = useState<string | null>(
     null
   );
+  const oppsScrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -65,22 +68,34 @@ export default function Landing() {
     const loadOpportunities = async () => {
       try {
         setOpportunitiesLoading(true);
-        const response = await fetch("/api/research-opportunities");
+        const response = await fetch(`${BASE_PATH}/opportunities.json`);
         if (!response.ok) {
-          throw new Error("Unable to load opportunities right now.");
+          throw new Error("Static data not found.");
         }
         const data = (await response.json()) as OpportunitiesResponse;
         if (!isMounted) return;
         setOpportunities(data.opportunities ?? []);
         setOpportunitiesUpdated(data.updatedAt ?? null);
         setOpportunitiesError(null);
-      } catch (error) {
-        if (!isMounted) return;
-        setOpportunitiesError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load opportunities right now."
-        );
+      } catch {
+        try {
+          const response = await fetch("/api/research-opportunities");
+          if (!response.ok) {
+            throw new Error("Unable to load opportunities right now.");
+          }
+          const data = (await response.json()) as OpportunitiesResponse;
+          if (!isMounted) return;
+          setOpportunities(data.opportunities ?? []);
+          setOpportunitiesUpdated(data.updatedAt ?? null);
+          setOpportunitiesError(null);
+        } catch (fallbackError) {
+          if (!isMounted) return;
+          setOpportunitiesError(
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : "Unable to load opportunities right now."
+          );
+        }
       } finally {
         if (isMounted) {
           setOpportunitiesLoading(false);
@@ -93,6 +108,17 @@ export default function Landing() {
       isMounted = false;
     };
   }, []);
+
+  const handleOppsScroll = (direction: "left" | "right") => {
+    const container = oppsScrollRef.current;
+    if (!container) return;
+    const card = container.querySelector(
+      `.${styles.oppsCard}`
+    ) as HTMLElement | null;
+    const cardWidth = card?.offsetWidth ?? 260;
+    const scrollAmount = (cardWidth + 20) * (direction === "right" ? 1 : -1);
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  };
 
   return (
     <div className={styles.container}>
@@ -259,26 +285,44 @@ export default function Landing() {
               No opportunities found right now.
             </div>
           ) : (
-            <div className={styles.oppsGrid}>
-              {opportunities.map((item) => (
-                <a
-                  key={item.url}
-                  href={item.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.oppsCard}
-                >
-                  <h3 className={styles.oppsCardTitle}>
-                    {truncateText(item.title, 50)}
-                  </h3>
-                  <p className={styles.oppsCardSummary}>
-                    {truncateText(item.additionalInfo, 100)}
-                  </p>
-                  <span className={styles.oppsLink}>
-                    View official posting
-                  </span>
-                </a>
-              ))}
+            <div className={styles.oppsScroller}>
+              <button
+                type="button"
+                className={`${styles.oppsArrow} ${styles.oppsArrowLeft}`}
+                onClick={() => handleOppsScroll("left")}
+                aria-label="Scroll opportunities left"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className={`${styles.oppsArrow} ${styles.oppsArrowRight}`}
+                onClick={() => handleOppsScroll("right")}
+                aria-label="Scroll opportunities right"
+              >
+                ›
+              </button>
+              <div ref={oppsScrollRef} className={styles.oppsTrack}>
+                {opportunities.map((item) => (
+                  <a
+                    key={item.url}
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.oppsCard}
+                  >
+                    <h3 className={styles.oppsCardTitle}>
+                      {truncateText(item.title, 50)}
+                    </h3>
+                    <p className={styles.oppsCardSummary}>
+                      {truncateText(item.additionalInfo, 100)}
+                    </p>
+                    <span className={styles.oppsLink}>
+                      View official posting
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </section>

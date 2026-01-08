@@ -20,6 +20,8 @@ type OpportunitiesResponse = {
   opportunities: Opportunity[];
 };
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 const truncateText = (value: string, maxLength: number) => {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 3).trimEnd()}...`;
@@ -47,22 +49,34 @@ export default function Directory() {
     const loadOpportunities = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/research-opportunities");
+        const response = await fetch(`${BASE_PATH}/opportunities.json`);
         if (!response.ok) {
-          throw new Error("Unable to load opportunities right now.");
+          throw new Error("Static data not found.");
         }
         const data = (await response.json()) as OpportunitiesResponse;
         if (!isMounted) return;
         setOpportunities(data.opportunities ?? []);
         setUpdatedAt(data.updatedAt ?? null);
         setError(null);
-      } catch (err) {
-        if (!isMounted) return;
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load opportunities right now."
-        );
+      } catch {
+        try {
+          const response = await fetch("/api/research-opportunities");
+          if (!response.ok) {
+            throw new Error("Unable to load opportunities right now.");
+          }
+          const data = (await response.json()) as OpportunitiesResponse;
+          if (!isMounted) return;
+          setOpportunities(data.opportunities ?? []);
+          setUpdatedAt(data.updatedAt ?? null);
+          setError(null);
+        } catch (fallbackError) {
+          if (!isMounted) return;
+          setError(
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : "Unable to load opportunities right now."
+          );
+        }
       } finally {
         if (isMounted) {
           setLoading(false);

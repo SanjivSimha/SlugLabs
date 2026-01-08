@@ -1,17 +1,5 @@
-import { NextResponse } from "next/server";
-
-export const runtime = "nodejs";
-
-type Opportunity = {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  email: string;
-  requirements: string;
-  additionalInfo: string;
-  category: string;
-};
+import fs from "fs";
+import path from "path";
 
 const INDEX_URL =
   "https://science.ucsc.edu/student-support/awards-research/";
@@ -56,38 +44,25 @@ const REQUIREMENT_KEYWORDS = [
   "standing",
 ];
 
-const normalizeSpace = (value: string) =>
+const normalizeSpace = (value) =>
   value.replace(/\s+/g, " ").replace(/\u00a0/g, " ").trim();
 
-const stripTags = (value: string) =>
+const stripTags = (value) =>
   normalizeSpace(value.replace(/<[^>]*>/g, " "));
 
-const makeId = (value: string) =>
-  Buffer.from(value, "utf8").toString("base64url");
+const makeId = (value) =>
+  Buffer.from(value, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 
-const decodeId = (value: string) => {
-  try {
-    return Buffer.from(value, "base64url").toString("utf8");
-  } catch {
-    return "";
-  }
-};
-
-const isUcscUrl = (value: string) => {
-  try {
-    const url = new URL(value);
-    return url.hostname.endsWith("ucsc.edu");
-  } catch {
-    return false;
-  }
-};
-
-const trimToLength = (value: string, maxLength: number) => {
+const trimToLength = (value, maxLength) => {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 };
 
-const fetchHtml = async (url: string) => {
+const fetchHtml = async (url) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -96,7 +71,6 @@ const fetchHtml = async (url: string) => {
       headers: {
         "User-Agent": "SlugLabsBot/1.0 (research opportunities aggregator)",
       },
-      next: { revalidate: 1800 },
     });
     if (!response.ok) return "";
     return await response.text();
@@ -107,11 +81,11 @@ const fetchHtml = async (url: string) => {
   }
 };
 
-const extractOpportunityLinksFromIndex = (html: string, baseUrl: string) => {
-  const links: Array<{ url: string; title: string }> = [];
+const extractOpportunityLinksFromIndex = (html, baseUrl) => {
+  const links = [];
   const anchorRegex =
     /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let match: RegExpExecArray | null = null;
+  let match = null;
 
   while ((match = anchorRegex.exec(html))) {
     const [, href, innerHtml] = match;
@@ -123,14 +97,13 @@ const extractOpportunityLinksFromIndex = (html: string, baseUrl: string) => {
 
     try {
       const resolved = new URL(href, baseUrl).toString();
-      if (!isUcscUrl(resolved)) continue;
       links.push({ url: resolved, title });
     } catch {
       continue;
     }
   }
 
-  const unique = new Map<string, string>();
+  const unique = new Map();
   for (const link of links) {
     if (!unique.has(link.url)) {
       unique.set(link.url, link.title);
@@ -140,7 +113,7 @@ const extractOpportunityLinksFromIndex = (html: string, baseUrl: string) => {
   return Array.from(unique.entries()).map(([url, title]) => ({ url, title }));
 };
 
-const extractTitle = (html: string) => {
+const extractTitle = (html) => {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   if (titleMatch?.[1]) return stripTags(titleMatch[1]);
   const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
@@ -148,7 +121,7 @@ const extractTitle = (html: string) => {
   return "";
 };
 
-const extractEmails = (html: string) => {
+const extractEmails = (html) => {
   const matches = html.match(
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
   );
@@ -159,11 +132,11 @@ const extractEmails = (html: string) => {
   return Array.from(unique);
 };
 
-const extractSections = (html: string) => {
-  const sections: Array<{ heading: string; content: string }> = [];
+const extractSections = (html) => {
+  const sections = [];
   const sectionRegex =
     /<h[1-6][^>]*>(.*?)<\/h[1-6]>([\s\S]*?)(?=<h[1-6]|$)/gi;
-  let match: RegExpExecArray | null = null;
+  let match = null;
 
   while ((match = sectionRegex.exec(html))) {
     const heading = stripTags(match[1]);
@@ -175,10 +148,10 @@ const extractSections = (html: string) => {
   return sections;
 };
 
-const extractListItems = (html: string) => {
-  const items: string[] = [];
+const extractListItems = (html) => {
+  const items = [];
   const itemRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
-  let match: RegExpExecArray | null = null;
+  let match = null;
 
   while ((match = itemRegex.exec(html))) {
     const text = stripTags(match[1]);
@@ -188,17 +161,14 @@ const extractListItems = (html: string) => {
   return items;
 };
 
-const findSectionText = (
-  sections: Array<{ heading: string; content: string }>,
-  keywords: string[]
-) => {
+const findSectionText = (sections, keywords) => {
   const match = sections.find((section) =>
     keywords.some((keyword) => section.heading.toLowerCase().includes(keyword))
   );
   return match?.content ?? "";
 };
 
-const extractRequirements = (html: string) => {
+const extractRequirements = (html) => {
   const sections = extractSections(html);
   const sectionText = findSectionText(sections, REQUIREMENT_HEADINGS);
   if (sectionText) return sectionText;
@@ -214,7 +184,7 @@ const extractRequirements = (html: string) => {
   return "";
 };
 
-const extractAdditionalInfo = (html: string) => {
+const extractAdditionalInfo = (html) => {
   const sections = extractSections(html);
   const sectionText = findSectionText(sections, ADDITIONAL_HEADINGS);
   if (sectionText) return sectionText;
@@ -225,7 +195,7 @@ const extractAdditionalInfo = (html: string) => {
   return "";
 };
 
-const buildOpportunity = async (url: string, fallbackTitle: string) => {
+const buildOpportunity = async (url, fallbackTitle) => {
   const html = await fetchHtml(url);
   if (!html) return null;
 
@@ -249,15 +219,15 @@ const buildOpportunity = async (url: string, fallbackTitle: string) => {
     requirements: trimToLength(requirements, 320),
     additionalInfo: trimToLength(additionalInfo, 360),
     category: CATEGORY,
-  } satisfies Opportunity;
+  };
 };
 
-const listOpportunities = async () => {
+const buildOpportunities = async () => {
   const indexHtml = await fetchHtml(INDEX_URL);
   if (!indexHtml) return [];
 
   const indexLinks = extractOpportunityLinksFromIndex(indexHtml, INDEX_URL);
-  const opportunities: Opportunity[] = [];
+  const opportunities = [];
 
   for (const link of indexLinks.slice(0, MAX_DETAIL_FETCHES)) {
     const opportunity = await buildOpportunity(link.url, link.title);
@@ -269,27 +239,16 @@ const listOpportunities = async () => {
   return opportunities;
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-
-  if (id) {
-    const decodedUrl = decodeId(id);
-    if (!decodedUrl || !isUcscUrl(decodedUrl)) {
-      return NextResponse.json({ error: "Invalid opportunity id." }, { status: 400 });
-    }
-
-    const opportunity = await buildOpportunity(decodedUrl, "");
-    if (!opportunity) {
-      return NextResponse.json({ error: "Opportunity not found." }, { status: 404 });
-    }
-
-    return NextResponse.json({ opportunity });
-  }
-
-  const opportunities = await listOpportunities();
-  return NextResponse.json({
+const run = async () => {
+  const opportunities = await buildOpportunities();
+  const output = {
     updatedAt: new Date().toISOString(),
     opportunities,
-  });
-}
+  };
+
+  const outputPath = path.join(process.cwd(), "public", "opportunities.json");
+  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+  console.log(`Wrote ${opportunities.length} opportunities to ${outputPath}`);
+};
+
+run();
